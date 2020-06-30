@@ -16,7 +16,7 @@ class RequestData:
     def get(self, key: str, default: str = "") -> (str, bool):
         """get string from data"""
         try:
-            return str(self.data.get(key, default))
+            return str(self.data.get(key, default)), True
         except ValueError:
             return default, False
 
@@ -36,8 +36,11 @@ class RequestData:
 
     def get_json(self, key: str):
         """get json object from data"""
+        value = self.data.get(key, "")
+        if isinstance(value, (dict, list)):
+            return value, True
         try:
-            return json.loads(self.data.get(key, "")), True
+            return json.loads(value), True
         except json.JSONDecodeError:
             return {}, False
 
@@ -49,5 +52,9 @@ def get_request_data() -> RequestData:
     else:
         data = request.get_json()
         if data is None:
-            data = request.get_data()
+            try:
+                data = json.loads(request.get_data())
+            except json.JSONDecodeError:
+                data = {}
+
     return RequestData(data)
