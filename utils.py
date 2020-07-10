@@ -52,9 +52,6 @@ def get_request_data() -> RequestData:
     else:
         data = request.get_json()
         if data is None:
-            try:
-                data = json.loads(request.get_data())
-            except json.JSONDecodeError:
-                data = {}
+            data = request.form.to_dict(flat=True)
 
     return RequestData(data)
